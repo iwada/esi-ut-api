@@ -38,6 +38,9 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
 
+  @OneToOne(mappedBy = "user")
+  private Doctor doctor;
+
   public User() {
   }
 
@@ -82,6 +85,7 @@ public class User {
   public Set<Role> getRoles() {
     return roles;
   }
+  
 
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
