@@ -94,7 +94,7 @@ public class DoctorController {
     }
 
 
-    @GetMapping("{doctorsId}/")
+    @GetMapping("{doctorsId}")
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
