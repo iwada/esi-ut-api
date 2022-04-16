@@ -1,7 +1,6 @@
 package io.medrem.payload.request;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.validation.constraints.NotBlank;

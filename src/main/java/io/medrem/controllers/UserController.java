@@ -1,10 +1,8 @@
 package io.medrem.controllers;
 
-import java.security.Principal;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.medrem.models.User;
+
 import io.medrem.repository.UserRepository;
 import io.medrem.security.services.UserDetailsImpl;
 

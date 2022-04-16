@@ -1,11 +1,13 @@
 package io.medrem.models;
 
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.List;
+
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -97,6 +99,8 @@ public class Doctor{
     @JoinColumn(name="user_id", referencedColumnName = "id")
     private User user;
     
-    
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    private List<Schedule> schedule;
   
 }
