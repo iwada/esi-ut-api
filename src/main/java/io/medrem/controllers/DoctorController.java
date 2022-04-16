@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.medrem.models.Appointment;
 import io.medrem.models.Doctor;
 import io.medrem.models.Schedule;
 import io.medrem.models.User;
 import io.medrem.payload.request.DoctorRequest;
 import io.medrem.payload.response.DoctorResponse;
 import io.medrem.payload.response.MessageResponse;
+import io.medrem.repository.AppointmentRepository;
 import io.medrem.repository.DoctorRepository;
 import io.medrem.repository.ScheduleRepository;
 import io.medrem.repository.UserRepository;
@@ -45,6 +47,9 @@ public class DoctorController {
 
     @Autowired
     ScheduleRepository scheduleRepository;
+
+    @Autowired
+    AppointmentRepository appointmentRepository;
 
     @PostMapping("/signup")
     @PreAuthorize("hasRole('PHYSICIAN')")
@@ -111,11 +116,17 @@ public class DoctorController {
         
         List<Schedule> schedules = new ArrayList<Schedule>();
         scheduleRepository.findByDoctorId(doctorId).forEach(schedules::add);
+
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        appointmentRepository.findByDoctorId(doctorId).forEach(appointments::add);
         return ResponseEntity.ok(new DoctorResponse(
                          doctor.getId(),
                          doctor.getSpecialty(), 
                          doctor.getLastname(), 
                          doctor.getFirstname(),
-                         schedules));
+                         schedules,
+                         appointments));
     }
+
+    
 }

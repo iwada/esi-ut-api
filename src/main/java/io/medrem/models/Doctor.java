@@ -18,6 +18,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "doctors")
 public class Doctor{
@@ -117,6 +119,7 @@ public class Doctor{
     private User user;
     
     @OneToMany(mappedBy = "doctor")
+    @JsonManagedReference
     private List<Appointment> appointment;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch=FetchType.LAZY)

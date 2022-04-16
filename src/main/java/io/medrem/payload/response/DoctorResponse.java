@@ -2,6 +2,7 @@ package io.medrem.payload.response;
 
 import java.util.List;
 
+import io.medrem.models.Appointment;
 import io.medrem.models.Schedule;
 
 public class DoctorResponse {
@@ -10,14 +11,16 @@ public class DoctorResponse {
     private String lastName;
     private String specialty;
     private List<Schedule> schedules;
+    private List<Appointment> appointments;
 
 
-    public DoctorResponse(Long Id, String firstName, String lastName, String specialty, List<Schedule> schedules) {
+    public DoctorResponse(Long Id, String firstName, String lastName, String specialty, List<Schedule> schedules, List<Appointment> appointments) {
         this.Id = Id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.specialty = specialty;
         this.schedules = schedules;
+        this.appointments = appointments;
     }
 
 
@@ -60,6 +63,16 @@ public class DoctorResponse {
     public void setSchedules(List<Schedule> schedules) {
         this.schedules = schedules;
     }
+
+
+    public List<Appointment> getAppointments() {
+        return this.appointments;
+    }
+
+    public void setAppointments(List<Appointment> appointments) {
+        this.appointments = appointments;
+    }
+    
 
     
     

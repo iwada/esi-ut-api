@@ -17,6 +17,8 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "appointments")
 public class Appointment {
@@ -33,10 +35,12 @@ public class Appointment {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="patient_id", referencedColumnName = "id")
+    @JsonBackReference
     private Patient patient;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="doctor_id", referencedColumnName = "id")
+    @JsonBackReference
     private Doctor doctor;
 
     
@@ -60,6 +64,9 @@ public class Appointment {
         this.label = label;
     }
    
+
+    public Appointment() {
+    }
 
 
     public Long getId() {
