@@ -38,12 +38,12 @@ public class ScheduleRequest {
     }
 
     public String getStartdate() {
-        String dayWeekText = new String();
+        String dayWeekText = "";
         try {
             Date parsedEndDate = new SimpleDateFormat("dd/MM/yyyy").parse(startdate);
             dayWeekText = new SimpleDateFormat("EEEE").format(parsedEndDate);
         } catch (Exception e) {
-        }
+}
         return this.startdate = dayWeekText;
     }
 
@@ -52,7 +52,7 @@ public class ScheduleRequest {
     }
 
     public String getEnddate() {
-        String dayWeekText = new String();
+        String dayWeekText = "";
         try {
             Date parsedEndDate = new SimpleDateFormat("dd/MM/yyyy").parse(enddate);
             dayWeekText = new SimpleDateFormat("EEEE").format(parsedEndDate);

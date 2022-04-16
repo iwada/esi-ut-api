@@ -53,7 +53,7 @@ public class DoctorController {
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Optional<User> optUser = userRepository.findById(userDetails.getId());
         User user = optUser.get();
-        if (doctorRepository.existsByUser(user)) {
+        if (Boolean.TRUE.equals(doctorRepository.existsByUser(user))) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor has already completed Registration"));
