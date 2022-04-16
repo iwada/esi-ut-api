@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -119,7 +120,7 @@ public class Doctor{
     private User user;
     
     @OneToMany(mappedBy = "doctor")
-    @JsonManagedReference
+    @JsonIgnore
     private List<Appointment> appointment;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
