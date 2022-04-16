@@ -1,7 +1,6 @@
 package io.medrem.controllers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,10 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.medrem.models.Doctor;
 import io.medrem.models.Schedule;
+import io.medrem.models.User;
 import io.medrem.payload.request.ScheduleRequest;
 import io.medrem.payload.response.MessageResponse;
 import io.medrem.repository.DoctorRepository;
 import io.medrem.repository.ScheduleRepository;
+import io.medrem.repository.UserRepository;
+import io.medrem.security.services.UserDetailsImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -39,6 +43,12 @@ public class ScheduleController {
     @Autowired
     ScheduleRepository scheduleRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
+    String ERROR_PRE = "Error: Doctor with ID: ";
+    String ERROR_POST = " does not exist.";
+
     @PostMapping("{doctorId}/schedule")
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> createSchedule(@Valid @RequestBody ScheduleRequest scheduleRequest,
@@ -47,15 +57,15 @@ public class ScheduleController {
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
+                    .body(new MessageResponse(ERROR_PRE + doctorId + ERROR_POST));
         }
 
-        if (scheduleRequest.isStartDateValid(scheduleRequest.getSDate())) {
+        if (Boolean.TRUE.equals(scheduleRequest.isStartDateValid(scheduleRequest.getSDate()))) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Start Date is Invalid"));
         }
-        if (scheduleRequest.isEndDateValid(scheduleRequest.getSDate(), scheduleRequest.getEDate())) {
+        if (Boolean.TRUE.equals(scheduleRequest.isEndDateValid(scheduleRequest.getSDate(), scheduleRequest.getEDate()))) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: End Date is Invalid"));
@@ -80,12 +90,18 @@ public class ScheduleController {
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
+                    .body(new MessageResponse(ERROR_PRE + doctorId + ERROR_POST));
+        }
+
+        if (doctor.getUser().getId() != doctorId) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: You can only Fetch your Own Schedule"));
         }
         List<Schedule> schedules = new ArrayList<Schedule>();
         scheduleRepository.findByDoctorId(doctorId).forEach(schedules::add);
         return new ResponseEntity<>(schedules, HttpStatus.OK);
-        
+
     }
 
     @DeleteMapping("{doctorsId}/schedules/{scheduleId}")
@@ -94,12 +110,18 @@ public class ScheduleController {
             @PathVariable("scheduleId") long scheduleId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
+        
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
 
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
+                    .body(new MessageResponse(ERROR_PRE + doctorId + ERROR_POST));
         }
+
         if (doctor.getUser().getId() != doctorId) {
             return ResponseEntity
                     .badRequest()
@@ -121,15 +143,17 @@ public class ScheduleController {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
 
+        
+
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
+                    .body(new MessageResponse(ERROR_PRE + doctorId + " does not exist."));
         }
         if (doctor.getUser().getId() != doctorId) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: You can only Delete you Own Schedule"));
+                    .body(new MessageResponse("Error: You can only Edit you Own Schedule"));
         }
         if (schedule == null) {
             return ResponseEntity

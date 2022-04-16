@@ -1,13 +1,10 @@
 package io.medrem.models;
 
-
 import java.util.List;
-
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,8 +19,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
-@Table(name = "doctors")
-public class Doctor{
+@Table(name = "patients")
+public class Patient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
@@ -40,21 +38,32 @@ public class Doctor{
 
     @NotBlank
     @Size(max = 50)
-    private String specialty;
+    private String mobilenumber;
+
+    @NotBlank
+    @Size(max = 50)
+    private String gender;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id", referencedColumnName = "id")
+    private User user;
+    
+    @OneToMany(mappedBy = "patient")
+    @JsonIgnore
+    private List<Appointment> appointment;
 
 
-    public Doctor(){
-        
+    public Patient() {
     }
-    public Doctor(String firstname, String lastname, String specialty, User user) {
+
+    public Patient(String firstname, String lastname, String mobilenumber, String gender, User user) {
         this.firstname = firstname;
         this.lastname = lastname;
-        this.specialty = specialty;
+        this.mobilenumber = mobilenumber;
+        this.gender = gender;
         this.user = user;
     }
 
-    
-  
 
     public Long getId() {
         return this.id;
@@ -80,12 +89,20 @@ public class Doctor{
         this.lastname = lastname;
     }
 
-    public String getSpecialty() {
-        return this.specialty;
+    public String getMobilenumber() {
+        return this.mobilenumber;
     }
 
-    public void setSpecialty(String specialty) {
-        this.specialty = specialty;
+    public void setMobilenumber(String mobilenumber) {
+        this.mobilenumber = mobilenumber;
+    }
+
+    public String getGender() {
+        return this.gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public User getUser() {
@@ -95,7 +112,7 @@ public class Doctor{
     public void setUser(User user) {
         this.user = user;
     }
-    
+
 
     public List<Appointment> getAppointment() {
         return this.appointment;
@@ -104,26 +121,8 @@ public class Doctor{
     public void setAppointment(List<Appointment> appointment) {
         this.appointment = appointment;
     }
-
-    public List<Schedule> getSchedule() {
-        return this.schedule;
-    }
-
-    public void setSchedule(List<Schedule> schedule) {
-        this.schedule = schedule;
-    }
-
-
    
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="user_id", referencedColumnName = "id")
-    private User user;
-    
-    @OneToMany(mappedBy = "doctor")
-    @JsonIgnore
-    private List<Appointment> appointment;
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
-    private List<Schedule> schedule;
-   
+
+
 }
