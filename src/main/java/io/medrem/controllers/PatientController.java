@@ -84,7 +84,7 @@ public class PatientController {
         if (patient.getUser().getId() != patientId) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: You can only Edit Your Own Details."));
+                    .body(new MessageResponse("Error: You can only View Your Own Details."));
         }
         
         patient.setFirstname(patientRequest.getFirstname());
@@ -100,11 +100,19 @@ public class PatientController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> showPatient(@PathVariable("patientId") long patientId, @RequestBody PatientRequest patientRequest) {
         Patient patient = patientRepository.findById(patientId).orElse(null);
+
+    
         if (patient == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
         }    
+
+        if (patient.getUser().getId() != patientId) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: You can only View Your Own Details."));
+        }
         List<Appointment> appointments = new ArrayList<>();
         appointmentRepository.findByPatientId(patientId).forEach(appointments::add);
         return ResponseEntity.ok(new PatientResponse(

@@ -33,12 +33,14 @@ public class Appointment {
     private LocalDateTime appointmentTimestamp;
 
 
-    @OneToOne(cascade = CascadeType.ALL)
+    //@OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name="patient_id", referencedColumnName = "id")
     @JsonBackReference
     private Patient patient;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    //@OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name="doctor_id", referencedColumnName = "id")
     @JsonBackReference
     private Doctor doctor;
