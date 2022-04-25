@@ -2,12 +2,15 @@ package io.medrem.controllers;
 
 
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.jobrunr.scheduling.BackgroundJob;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -77,6 +80,7 @@ public class AppointmentController {
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with the Provided ID does not exist."));
         }
+       
 
         if (patient == null) {
             return ResponseEntity
@@ -91,6 +95,13 @@ public class AppointmentController {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Invalid Date Format"));
+        }
+
+        Date currentDate = new Date();
+        if ( !Date.from(appointmentSchedule.toInstant(ZoneOffset.UTC)).after(currentDate)) { // Let's ensure Appooinment is in the future
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Appointment Date is Invalid"));
         }
 
         if (patient.getUser().getId() != patientId) {
@@ -114,6 +125,14 @@ public class AppointmentController {
                 String.valueOf(patient.getUser().getEmail()),
                 String.valueOf(doctor.getFirstname() + " " + doctor.getLastname()),
                 String.valueOf(appointmentSchedule), String.valueOf(patient.getFirstname())));
+     
+        // We schedule this appointment in the future. We extract 86,400 seconds to send the reminder a day before the schedule       
+        BackgroundJob.schedule(appointmentSchedule.toInstant(ZoneOffset.UTC).minusSeconds(86400), () -> medremMailSender.sendAppointmentReminder(
+            String.valueOf(patient.getUser().getEmail()),
+            String.valueOf(doctor.getFirstname() + " " + doctor.getLastname()),
+            String.valueOf(appointmentSchedule),
+            String.valueOf(patient.getFirstname())
+        ));  
 
         return ResponseEntity.ok(new MessageResponse("Appointment registered successfully!"));
 
