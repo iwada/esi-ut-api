@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.medrem.models.Appointment;
 import io.medrem.models.Doctor;
 import io.medrem.models.Schedule;
 import io.medrem.models.User;
 import io.medrem.payload.request.DoctorRequest;
 import io.medrem.payload.response.DoctorResponse;
 import io.medrem.payload.response.MessageResponse;
+import io.medrem.repository.AppointmentRepository;
 import io.medrem.repository.DoctorRepository;
 import io.medrem.repository.ScheduleRepository;
 import io.medrem.repository.UserRepository;
@@ -46,6 +48,9 @@ public class DoctorController {
     @Autowired
     ScheduleRepository scheduleRepository;
 
+    @Autowired
+    AppointmentRepository appointmentRepository;
+
     @PostMapping("/signup")
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> registerDoctor(@Valid @RequestBody DoctorRequest doctorRequest) {
@@ -53,7 +58,7 @@ public class DoctorController {
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Optional<User> optUser = userRepository.findById(userDetails.getId());
         User user = optUser.get();
-        if (doctorRepository.existsByUser(user)) {
+        if (Boolean.TRUE.equals(doctorRepository.existsByUser(user))) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor has already completed Registration"));
@@ -75,12 +80,17 @@ public class DoctorController {
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> editDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != doctorId) {
+        if (doctor.getUser().getId() != user.getId()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));
@@ -94,16 +104,21 @@ public class DoctorController {
     }
 
 
-    @GetMapping("{doctorsId}/")
+    @GetMapping("{doctorsId}")
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != doctorId) {
+        if (doctor.getUser().getId() != user.getId()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));
@@ -111,11 +126,17 @@ public class DoctorController {
         
         List<Schedule> schedules = new ArrayList<Schedule>();
         scheduleRepository.findByDoctorId(doctorId).forEach(schedules::add);
+
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        appointmentRepository.findByDoctorId(doctorId).forEach(appointments::add);
         return ResponseEntity.ok(new DoctorResponse(
                          doctor.getId(),
                          doctor.getSpecialty(), 
                          doctor.getLastname(), 
                          doctor.getFirstname(),
-                         schedules));
+                         schedules,
+                         appointments));
     }
+
+    
 }
