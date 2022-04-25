@@ -122,7 +122,8 @@ public class ScheduleController {
                     .body(new MessageResponse(ERROR_PRE + doctorId + ERROR_POST));
         }
 
-        if (doctor.getUser().getId() != doctorId) {
+   
+        if (doctor.getUser().getId() != user.getId()){
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Delete you Own Schedule"));
