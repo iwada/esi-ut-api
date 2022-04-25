@@ -65,5 +65,22 @@ public class MedremMailSender {
 
         mailSender.send(message);
     }
+
+    public void sendAppointmentReminder(String to, String doctor, String appointmentDate,String name) {
+        String from = "<ESI-TeamN>esi.team.n@gmail.com";
+     
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Appointment is Approaching");
+        message.setText(String.format("Hello %s, \nYour Appointment  with Dr. %s for %s is approaching.!. \n\nKind Regards\nESI-Team N",name,doctor,appointmentDate));
+
+        mailSender.send(message);
+    }
+
+    public void test(){
+        
+    }
     
 }
