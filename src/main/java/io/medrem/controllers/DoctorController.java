@@ -80,12 +80,17 @@ public class DoctorController {
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> editDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != doctorId) {
+        if (doctor.getUser().getId() != user.getId()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));
@@ -103,12 +108,17 @@ public class DoctorController {
     @PreAuthorize("hasRole('PHYSICIAN')")
     public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != doctorId) {
+        if (doctor.getUser().getId() != user.getId()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));

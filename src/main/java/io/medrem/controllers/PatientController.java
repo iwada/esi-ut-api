@@ -76,15 +76,19 @@ public class PatientController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> editPatient(@PathVariable("patientId") long patientId, @Valid @RequestBody PatientRequest patientRequest) {
         Patient patient = patientRepository.findById(patientId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
         if (patient == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
         }
-        if (patient.getUser().getId() != patientId) {
+        if (patient.getUser().getId() != user.getId())  {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: You can only View Your Own Details."));
+                    .body(new MessageResponse("Error: You can only edit Your Own Details."));
         }
         
         patient.setFirstname(patientRequest.getFirstname());
@@ -100,6 +104,10 @@ public class PatientController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> showPatient(@PathVariable("patientId") long patientId, @RequestBody PatientRequest patientRequest) {
         Patient patient = patientRepository.findById(patientId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
 
     
         if (patient == null) {
@@ -108,7 +116,7 @@ public class PatientController {
                     .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
         }    
 
-        if (patient.getUser().getId() != patientId) {
+        if (patient.getUser().getId() != user.getId())  {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only View Your Own Details."));
