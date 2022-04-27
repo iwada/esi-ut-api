@@ -28,6 +28,8 @@ public class AppointmentRequest {
     @Size(max = 250)
     private String label;
 
+    private Boolean active;
+
     public AppointmentRequest(String appointmentTimestamp, Patient patient, Doctor doctor, String notes, String color,
             String label) {
         this.appointmentTimestamp = appointmentTimestamp;
@@ -37,6 +39,37 @@ public class AppointmentRequest {
         this.color = color;
         this.label = label;
     }
+
+    public AppointmentRequest() {
+    }
+    
+
+    public AppointmentRequest(String appointmentTimestamp, Patient patient, Doctor doctor, String notes, String color,
+            String label, boolean active) {
+        this.appointmentTimestamp = appointmentTimestamp;
+        this.patient = patient;
+        this.doctor = doctor;
+        this.notes = notes;
+        this.color = color;
+        this.label = label;
+        this.active = active;
+    }
+
+
+    public Boolean isActive() {
+        return this.active;
+    }
+
+    public Boolean getActive() {
+        return this.active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    
+    
 
     public String getAppointmentTimestamp() {
         return this.appointmentTimestamp;

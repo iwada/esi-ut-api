@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -74,6 +75,10 @@ public class AppointmentController {
             @PathVariable("patientId") long patientId) {
         Patient patient = patientRepository.findById(patientId).orElse(null);
         Doctor doctor = doctorRepository.findById(appointmentRequest.getDoctor().getId()).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
 
         if (doctor == null) {
             return ResponseEntity
@@ -87,6 +92,15 @@ public class AppointmentController {
                     .badRequest()
                     .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
         }
+    
+        if (String.valueOf(user.getRoles().iterator().next().getName()) == "ROLE_USER") {
+            if (patient.getUser().getId() != user.getId()) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Error: You can only Create appointment for yourself."));
+            }
+        }
+       
 
         LocalDateTime appointmentSchedule;
         if (appointmentRequest.getAppointmentTimestamp().matches(regex)) {
@@ -104,11 +118,7 @@ public class AppointmentController {
                     .body(new MessageResponse("Error: Appointment Date is Invalid"));
         }
 
-        if (patient.getUser().getId() != patientId) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: You can only create Appointment for yourSelf."));
-        }
+       
 
         Appointment appointment = new Appointment(
                 appointmentSchedule,
@@ -116,7 +126,8 @@ public class AppointmentController {
                 doctor,
                 appointmentRequest.getNotes(),
                 appointmentRequest.getColor(),
-                appointmentRequest.getLabel());
+                appointmentRequest.getLabel()
+                );
 
         appointmentRepository.save(appointment);
 
@@ -138,6 +149,63 @@ public class AppointmentController {
 
     }
 
+    @GetMapping("/patients/{patientId}/appointments/{appointmentId}/confirm")
+    @PreAuthorize("hasRole('USER') or hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
+    public ResponseEntity<?> confirmAppointment(@PathVariable("patientId") long patientId,
+            @PathVariable("appointmentId") long appointmentId) {
+        Patient patient = patientRepository.findById(patientId).orElse(null);
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+     
+        if (patient == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
+        }
+        
+        if (String.valueOf(user.getRoles().iterator().next().getName()) == "ROLE_USER") {
+            if (patient.getUser().getId() != user.getId()) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Error: You can only edit Your Own Details."));
+            }
+        }
+        if (appointment == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Appointment with ID: " + appointmentId + " does not exist."));
+        }
+
+        if (String.valueOf(user.getRoles().iterator().next().getName()) == "ROLE_USER") {
+            if (patient.getUser().getId() != user.getId()) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Error: You can only edit Your Own Details."));
+            }
+        }
+
+        if (appointment.isActive()){
+            return ResponseEntity
+            .badRequest()
+            .body(new MessageResponse("Message: Appointment is Already Confirmed."));
+        }
+        appointment.setActive(true); // Set appointment back to "Confirmed"
+
+        appointmentRepository.save(appointment);
+
+        Doctor doctor = doctorRepository.findById(appointment.getDoctor().getId()).orElse(null);
+        jobScheduler.enqueue(() -> medremMailSender.sendAppointmentDeletedNotification(
+                String.valueOf(patient.getUser().getEmail()),
+                String.valueOf(doctor.getFirstname() + " " + doctor.getLastname()),
+                String.valueOf(appointment.getAppointmentTimestamp()), String.valueOf(patient.getFirstname())));
+
+        return ResponseEntity.ok(new MessageResponse("Appointment has been reconfirmed successfully!"));
+    }
+
+    
     @PutMapping("/patients/{patientId}/appointments/{appointmentId}/edit")
     @PreAuthorize("hasRole('USER') or hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> editAppointment(@PathVariable("patientId") long patientId,
@@ -185,6 +253,8 @@ public class AppointmentController {
         appointment.setNotes(appointmentRequest.getNotes());
         appointment.setColor(appointmentRequest.getColor());
         appointment.setLabel(appointmentRequest.getLabel());
+        //Set appointment as "inactive" after each update. Informm User | Doctor. and Either of them can change the status once
+        appointment.setActive(false);
 
         appointmentRepository.save(appointment);
 

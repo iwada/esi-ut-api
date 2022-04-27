@@ -54,6 +54,9 @@ public class Appointment {
 
     @Size(max = 250)
     private String label;
+
+    @Column(name = "active" ,columnDefinition = "boolean default true")
+    private Boolean active = true;
     
 
 
@@ -65,9 +68,33 @@ public class Appointment {
         this.color = color;
         this.label = label;
     }
+
+    //
+    public Appointment(LocalDateTime appointmentTimestamp, Patient patient, Doctor doctor, String notes, String color, String label, boolean active) {
+        this.appointmentTimestamp = appointmentTimestamp;
+        this.patient = patient;
+        this.doctor = doctor;
+        this.notes = notes;
+        this.color = color;
+        this.label = label;
+        this.active = active;
+    }
    
 
     public Appointment() {
+    }
+
+
+    public Boolean isActive() {
+        return this.active;
+    }
+
+    public Boolean getActive() {
+        return this.active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
 

@@ -48,7 +48,7 @@ public class MedremMailSender {
         message.setFrom(from);
         message.setTo(to);
         message.setSubject("Appointment Has been Modified");
-        message.setText(String.format("Hello %s, \nYour Appointment  with Dr. %s has been modified. New Schedule is %s. See you then!. \n\nKind Regards\nESI-Team N",name,doctor,appointmentDate));
+        message.setText(String.format("Hello %s, \nYour Appointment  with Dr. %s has been modified. New Schedule is %s. You have to either accept or reject this change on your dashboard. See you then!. \n\nKind Regards\nESI-Team N",name,doctor,appointmentDate));
 
         mailSender.send(message);
     }
@@ -65,6 +65,8 @@ public class MedremMailSender {
 
         mailSender.send(message);
     }
+
+    
 
     public void sendAppointmentReminder(String to, String doctor, String appointmentDate,String name) {
         String from = "<ESI-TeamN>esi.team.n@gmail.com";
