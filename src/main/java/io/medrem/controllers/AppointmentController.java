@@ -66,6 +66,8 @@ public class AppointmentController {
 
     String regex = "(\\d{4})-(\\d{2})-(\\d{2})[T](\\d{2}):(\\d{2}):(\\d{2})";
 
+    String authMessage = "Error: You can only edit Your Own Details.";
+
     // 25.04.22 - Maybe i implement a generic create appointment at /appointment/new
     // that takes patient_id,doctor_id? discuss merits
     // with team morrow. But i kind of prefer this curent pattern.
@@ -170,7 +172,7 @@ public class AppointmentController {
             if (patient.getUser().getId() != user.getId()) {
                 return ResponseEntity
                         .badRequest()
-                        .body(new MessageResponse("Error: You can only edit Your Own Details."));
+                        .body(new MessageResponse(authMessage));
             }
         }
         if (appointment == null) {
@@ -183,7 +185,7 @@ public class AppointmentController {
             if (patient.getUser().getId() != user.getId()) {
                 return ResponseEntity
                         .badRequest()
-                        .body(new MessageResponse("Error: You can only edit Your Own Details."));
+                        .body(new MessageResponse(authMessage));
             }
         }
 
@@ -230,7 +232,7 @@ public class AppointmentController {
             if (patient.getUser().getId() != user.getId()) {
                 return ResponseEntity
                         .badRequest()
-                        .body(new MessageResponse("Error: You can only edit Your Own Details."));
+                        .body(new MessageResponse(authMessage));
             }
         }
         if (appointment == null) {
