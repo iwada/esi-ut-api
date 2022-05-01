@@ -71,8 +71,8 @@ public class ScheduleController {
                     .body(new MessageResponse("Error: End Date is Invalid"));
         }
         Schedule schedule = new Schedule(
-                scheduleRequest.getStartdate(),
-                scheduleRequest.getEnddate(),
+                (scheduleRequest.getIsRecurring().equals("1") ? scheduleRequest.getStartdate() : scheduleRequest.getSDate()),
+                (scheduleRequest.getIsRecurring().equals("1") ? scheduleRequest.getEnddate() : scheduleRequest.getEDate()),
                 scheduleRequest.getIsAvailable(),
                 scheduleRequest.getIsRecurring(),
                 doctor);
@@ -161,8 +161,8 @@ public class ScheduleController {
                     .badRequest()
                     .body(new MessageResponse("Error: Schedule with ID: " + scheduleId + " does not exist."));
         }
-        schedule.setStartdate(scheduleRequest.getStartdate());
-        schedule.setEnddate(scheduleRequest.getEnddate());
+        schedule.setStartdate((scheduleRequest.getIsRecurring().equals("1") ? scheduleRequest.getStartdate() : scheduleRequest.getSDate()));
+        schedule.setEnddate((scheduleRequest.getIsRecurring().equals("1") ? scheduleRequest.getEnddate() : scheduleRequest.getEDate()));
         schedule.setIsAvailable(scheduleRequest.getIsAvailable());
         schedule.setIsRecurring(scheduleRequest.getIsRecurring());
 

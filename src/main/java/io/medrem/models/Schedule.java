@@ -103,6 +103,9 @@ public class Schedule{
         this.isRecurring = isRecurring;
     }
 
+    public Doctor getDoctor() {
+        return this.doctor;
+    }
    
 
     public void setDoctor(Doctor doctor) {

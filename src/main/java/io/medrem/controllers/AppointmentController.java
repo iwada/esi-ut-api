@@ -2,14 +2,21 @@ package io.medrem.controllers;
 
 
 
+import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.validation.Valid;
 
+import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.jobrunr.scheduling.BackgroundJob;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
 import io.medrem.models.Appointment;
 import io.medrem.models.Doctor;
 import io.medrem.models.Patient;
+import io.medrem.models.Schedule;
 import io.medrem.models.User;
 import io.medrem.payload.request.AppointmentRequest;
 import io.medrem.payload.response.MessageResponse;
 import io.medrem.repository.AppointmentRepository;
 import io.medrem.repository.DoctorRepository;
 import io.medrem.repository.PatientRepository;
+import io.medrem.repository.ScheduleRepository;
 import io.medrem.repository.UserRepository;
 import io.medrem.security.services.MedremMailSender;
 import io.medrem.security.services.UserDetailsImpl;
@@ -51,6 +60,9 @@ public class AppointmentController {
 
     @Autowired
     DoctorRepository doctorRepository;
+
+    @Autowired
+    ScheduleRepository scheduleRepository;
 
     @Autowired
     AppointmentRepository appointmentRepository;
@@ -306,5 +318,58 @@ public class AppointmentController {
 
         appointmentRepository.deleteById(appointmentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/doctors/{doctorId}/appointments/{scheduleId}")
+    @PreAuthorize("hasRole('PHYSICIAN')")
+    public ResponseEntity<?> getAppointmentsFromSchedule(@PathVariable("doctorId") long doctorId, @PathVariable("scheduleId") long scheduleId) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+
+        if (doctor == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
+        }
+        if (doctor.getUser().getId() != userDetails.getId()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: You can only Edit Your Own Details."));
+        }
+        if (schedule == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Schedule with ID: " + schedule + " does not exist."));
+        }
+        if (schedule.getDoctor().getUser().getId() != doctor.getUser().getId()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: You can only access your own schedules."));
+        }
+
+
+        Predicate<Appointment> pred;
+        if (schedule.getIsRecurring().equals("1")) {
+            DayOfWeek startDate = DayOfWeek.valueOf(schedule.getStartdate().toUpperCase());
+            DayOfWeek endDate = DayOfWeek.valueOf(schedule.getEnddate().toUpperCase());
+
+            pred = ap -> (startDate.compareTo(ap.getAppointmentTimestamp().getDayOfWeek()) <= 0 
+                                            && endDate.compareTo(ap.getAppointmentTimestamp().getDayOfWeek()) >= 0);
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate startDate = LocalDate.parse(schedule.getStartdate(), formatter);
+            LocalDate endDate = LocalDate.parse(schedule.getEnddate(), formatter);
+
+            pred = ap -> (startDate.compareTo(ap.getAppointmentTimestamp().toLocalDate()) <= 0
+                                            && endDate.compareTo(ap.getAppointmentTimestamp().toLocalDate()) >= 0);
+        }
+
+
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        appointmentRepository.findByDoctorId(doctorId).forEach(ap -> { if (pred.test(ap)) {appointments.add(ap);} });
+
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 }
