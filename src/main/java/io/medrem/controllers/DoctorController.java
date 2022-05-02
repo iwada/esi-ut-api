@@ -106,7 +106,7 @@ public class DoctorController {
 
     @GetMapping("{doctorsId}")
     @PreAuthorize("hasRole('PHYSICIAN')")
-    public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
+    public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
