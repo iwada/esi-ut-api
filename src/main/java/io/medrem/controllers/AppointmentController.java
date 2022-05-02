@@ -338,7 +338,7 @@ public class AppointmentController {
         if (schedule == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Schedule with ID: " + schedule + " does not exist."));
+                    .body(new MessageResponse("Error: Schedule with ID: " + scheduleId + " does not exist."));
         }
         if (schedule.getDoctor().getUser().getId() != doctor.getUser().getId()) {
             return ResponseEntity
