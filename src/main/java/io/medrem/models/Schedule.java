@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "schedules")
 public class Schedule{
@@ -43,6 +45,7 @@ public class Schedule{
     //@JoinColumn(name="doctor_id", referencedColumnName = "id")
     //private Doctor doctor;
     
+    @JsonBackReference 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="doctor_id", referencedColumnName = "id")
     private Doctor  doctor;
