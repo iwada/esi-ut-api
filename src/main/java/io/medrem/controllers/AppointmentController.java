@@ -318,7 +318,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/doctors/{doctorId}/appointments/{scheduleId}")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('PHYSICIAN') or hasRole('RECEPTIONIST') ")
     public ResponseEntity<?> getAppointmentsFromSchedule(@PathVariable("doctorId") long doctorId, @PathVariable("scheduleId") long scheduleId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);

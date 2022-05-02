@@ -78,7 +78,7 @@ public class DoctorController {
     }
 
     @PutMapping("{doctorsId}/edit")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('PHYSICIAN') or hasRole('RECEPTIONIST')")
     public ResponseEntity<?> editDoctor(@PathVariable("doctorsId") long doctorId, @Valid @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -106,7 +106,7 @@ public class DoctorController {
 
 
     @GetMapping("{doctorsId}")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('PHYSICIAN') or hasRole('RECEPTIONIST')")
     public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

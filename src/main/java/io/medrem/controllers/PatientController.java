@@ -74,7 +74,7 @@ public class PatientController {
     }
 
     @PutMapping("{patientId}/edit")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('RECEPTIONIST')")
     public ResponseEntity<?> editPatient(@PathVariable("patientId") long patientId, @Valid @RequestBody PatientRequest patientRequest) {
         Patient patient = patientRepository.findById(patientId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
