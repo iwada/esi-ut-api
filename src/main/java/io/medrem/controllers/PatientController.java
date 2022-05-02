@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -101,8 +102,8 @@ public class PatientController {
 
 
     @GetMapping("{patientId}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> showPatient(@PathVariable("patientId") long patientId, @RequestBody PatientRequest patientRequest) {
+    @PreAuthorize("hasRole('USER') or hasRole('RECEPTIONIST') ")
+    public ResponseEntity<?> showPatient(@PathVariable("patientId") long patientId) {
         Patient patient = patientRepository.findById(patientId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
@@ -116,10 +117,13 @@ public class PatientController {
                     .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
         }    
 
-        if (patient.getUser().getId() != user.getId())  {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: You can only View Your Own Details."));
+         // So Only Receptionist, Doctors should be able to 
+         if (String.valueOf(user.getRoles().iterator().next().getName()) == "ROLE_USER") {
+            if (patient.getUser().getId() != user.getId()) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Error: You can only Delete Your Own Details."));
+            }
         }
         List<Appointment> appointments = new ArrayList<>();
         appointmentRepository.findByPatientId(patientId).forEach(appointments::add);
@@ -132,7 +136,12 @@ public class PatientController {
             appointments));
     }
 
-
+    @GetMapping("")
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    public ResponseEntity<?> getAllPatients(){
+        List<Patient> patients = patientRepository.findAll();
+        return new ResponseEntity<>(patients, HttpStatus.OK);
+    }
     
     
 }

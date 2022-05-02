@@ -50,7 +50,7 @@ public class ScheduleController {
     String ERROR_POST = " does not exist.";
 
     @PostMapping("{doctorId}/schedule")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> createSchedule(@Valid @RequestBody ScheduleRequest scheduleRequest,
             @PathVariable("doctorId") Long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
@@ -84,7 +84,7 @@ public class ScheduleController {
     }
 
     @GetMapping("{doctorId}/schedules")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> getDoctorsSchedules(String publisher_name, @PathVariable("doctorId") Long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         if (doctor == null) {
@@ -105,7 +105,7 @@ public class ScheduleController {
     }
 
     @DeleteMapping("{doctorsId}/schedules/{scheduleId}")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> deleteSchedule(@PathVariable("doctorsId") long doctorId,
             @PathVariable("scheduleId") long scheduleId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
@@ -138,7 +138,7 @@ public class ScheduleController {
     }
 
     @PutMapping("{doctorsId}/schedules/{scheduleId}")
-    @PreAuthorize("hasRole('PHYSICIAN')")
+    @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> editSchedule(@PathVariable("doctorsId") long doctorId,
             @PathVariable("scheduleId") long scheduleId, @Valid @RequestBody ScheduleRequest scheduleRequest) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
@@ -168,5 +168,12 @@ public class ScheduleController {
 
         scheduleRepository.save(schedule);
         return ResponseEntity.ok(new MessageResponse("Schedule updated successfully!"));
+    }
+
+    @GetMapping("/schedules")
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    public ResponseEntity<?> getAllSchedules(){
+        List<Schedule> schedules = scheduleRepository.findAll();
+        return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -136,6 +137,14 @@ public class DoctorController {
                          doctor.getFirstname(),
                          schedules,
                          appointments));
+    }
+
+
+    @GetMapping("")
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    public ResponseEntity<?> getAllDoctors(){
+        List<Doctor> doctors = doctorRepository.findAll();
+        return new ResponseEntity<>(doctors, HttpStatus.OK);
     }
 
     

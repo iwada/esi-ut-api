@@ -1,10 +1,12 @@
 package io.medrem.controllers;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -96,7 +98,7 @@ public class ReceptionistController {
 
     @GetMapping("{receptionistId}")
     @PreAuthorize("hasRole('RECEPTIONIST')")
-    public ResponseEntity<?> showReceptionist(@PathVariable("receptionistId") long receptionistId, @RequestBody ReceptionistRequest receptionistRequest) {
+    public ResponseEntity<?> showReceptionist(@PathVariable("receptionistId") long receptionistId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Optional<User> optUser = userRepository.findById(userDetails.getId());
@@ -125,6 +127,13 @@ public class ReceptionistController {
             receptionist.getMobilenumber(),
             receptionist.getGender()
             ));
+    }
+
+    @GetMapping("")
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    public ResponseEntity<?> getAllReceptionists(){
+        List<Receptionist> receptionists = receptionistRepository.findAll();
+        return new ResponseEntity<>(receptionists, HttpStatus.OK);
     }
 
     

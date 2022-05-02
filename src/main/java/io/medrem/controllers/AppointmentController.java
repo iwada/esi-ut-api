@@ -131,9 +131,6 @@ public class AppointmentController {
                     .badRequest()
                     .body(new MessageResponse("Error: Appointment Date is Invalid"));
         }
-
-       
-
         Appointment appointment = new Appointment(
                 appointmentSchedule,
                 patient,
@@ -372,4 +369,13 @@ public class AppointmentController {
 
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
+
+    @GetMapping("/appointments")
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    public ResponseEntity<?> getAllAppointments(){
+        List<Appointment> appointments = appointmentRepository.findAll();
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
+    }
+
+    
 }
