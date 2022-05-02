@@ -42,7 +42,7 @@ public class Appointment {
     //@OneToOne(cascade = CascadeType.ALL)
     @OneToOne
     @JoinColumn(name="doctor_id", referencedColumnName = "id")
-    @JsonBackReference
+    //@JsonBackReference
     private Doctor doctor;
 
     

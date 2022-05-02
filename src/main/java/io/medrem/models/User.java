@@ -40,7 +40,7 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
 
-  @JsonManagedReference
+  //@JsonManagedReference
   @OneToOne(mappedBy = "user")
   private Doctor doctor;
 

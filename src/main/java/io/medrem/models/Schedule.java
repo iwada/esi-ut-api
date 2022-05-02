@@ -45,7 +45,7 @@ public class Schedule{
     //@JoinColumn(name="doctor_id", referencedColumnName = "id")
     //private Doctor doctor;
     
-    @JsonBackReference 
+    //@JsonBackReference 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="doctor_id", referencedColumnName = "id")
     private Doctor  doctor;

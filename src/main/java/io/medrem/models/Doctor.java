@@ -124,6 +124,7 @@ public class Doctor{
     private List<Appointment> appointment;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @JsonIgnore
     private List<Schedule> schedule;
    
 }
