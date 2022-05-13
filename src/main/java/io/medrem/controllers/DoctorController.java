@@ -105,10 +105,10 @@ public class DoctorController {
     }
 
 
-    @GetMapping("{doctorsId}")
+    @GetMapping("{doctorsUserId}")
     @PreAuthorize("hasRole('PHYSICIAN') or hasRole('RECEPTIONIST')")
-    public ResponseEntity<?> showDoctor(@PathVariable("doctorsId") long doctorId) {
-        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+    public ResponseEntity<?> showDoctor(@PathVariable("doctorsUserId") long doctorsUserId) {
+        Doctor doctor = doctorRepository.findByUserId(doctorsUserId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Optional<User> optUser = userRepository.findById(userDetails.getId());
@@ -117,14 +117,15 @@ public class DoctorController {
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
+                    .body(new MessageResponse("Error: Doctor with user ID: " + doctorsUserId+ " does not exist."));
         }
-        if (doctor.getUser().getId() != user.getId()) {
+        if (doctorsUserId != user.getId()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));
         }
         
+        long doctorId = doctor.getId();
         List<Schedule> schedules = new ArrayList<Schedule>();
         scheduleRepository.findByDoctorId(doctorId).forEach(schedules::add);
 

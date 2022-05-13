@@ -13,7 +13,7 @@ import io.medrem.models.User;
 public interface DoctorRepository extends JpaRepository<Doctor, Long>{
     Boolean existsByUser(User user);
     Optional<Doctor> findById(Long id);
-
+    Optional<Doctor> findByUserId(Long id);
 
     
 }

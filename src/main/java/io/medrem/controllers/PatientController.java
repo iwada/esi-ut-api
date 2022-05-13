@@ -101,10 +101,10 @@ public class PatientController {
     }
 
 
-    @GetMapping("{patientId}")
+    @GetMapping("{patientUserId}")
     @PreAuthorize("hasRole('USER') or hasRole('RECEPTIONIST') ")
-    public ResponseEntity<?> showPatient(@PathVariable("patientId") long patientId) {
-        Patient patient = patientRepository.findById(patientId).orElse(null);
+    public ResponseEntity<?> showPatient(@PathVariable("patientUserId") long patientUserId) {
+        Patient patient = patientRepository.findByUserId(patientUserId).orElse(null);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Optional<User> optUser = userRepository.findById(userDetails.getId());
@@ -114,7 +114,7 @@ public class PatientController {
         if (patient == null) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Patient with ID: " + patientId + " does not exist."));
+                    .body(new MessageResponse("Error: Patient with user ID: " + patientUserId + " does not exist."));
         }    
 
          // So Only Receptionist, Doctors should be able to 
@@ -126,7 +126,7 @@ public class PatientController {
             }
         }
         List<Appointment> appointments = new ArrayList<>();
-        appointmentRepository.findByPatientId(patientId).forEach(appointments::add);
+        appointmentRepository.findByPatientId(patient.getId()).forEach(appointments::add);
         return ResponseEntity.ok(new PatientResponse(
             patient.getId(),
             patient.getFirstname(), 
