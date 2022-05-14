@@ -144,6 +144,10 @@ public class ScheduleController {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
         Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
         
 
         if (doctor == null) {
@@ -151,7 +155,7 @@ public class ScheduleController {
                     .badRequest()
                     .body(new MessageResponse(ERROR_PRE + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != doctorId) {
+        if (doctor.getUser().getId() != user.getId()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit you Own Schedule"));
