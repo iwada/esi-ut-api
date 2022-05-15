@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.medrem.models.Doctor;
 import io.medrem.models.Schedule;
 import io.medrem.models.User;
+import io.medrem.models.ERole;
 import io.medrem.payload.request.ScheduleRequest;
 import io.medrem.payload.response.MessageResponse;
 import io.medrem.repository.DoctorRepository;
@@ -87,13 +88,19 @@ public class ScheduleController {
     @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('ADMIN') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> getDoctorsSchedules(String publisher_name, @PathVariable("doctorId") Long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+
         if (doctor == null) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse(ERROR_PRE + doctorId + ERROR_POST));
         }
 
-        if (doctor.getUser().getId() != doctorId) {
+        if (doctor.getUser().getId() != user.getId() && (user.getRoles().iterator().next().getName() != ERole.ROLE_RECEPTIONIST)) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Fetch your Own Schedule"));
@@ -123,7 +130,7 @@ public class ScheduleController {
         }
 
    
-        if (doctor.getUser().getId() != user.getId()){
+        if (doctor.getUser().getId() != user.getId() && (user.getRoles().iterator().next().getName() != ERole.ROLE_RECEPTIONIST)){
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Delete you Own Schedule"));
@@ -155,7 +162,7 @@ public class ScheduleController {
                     .badRequest()
                     .body(new MessageResponse(ERROR_PRE + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != user.getId()) {
+        if (doctor.getUser().getId() != user.getId() && (user.getRoles().iterator().next().getName() != ERole.ROLE_RECEPTIONIST)) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit you Own Schedule"));

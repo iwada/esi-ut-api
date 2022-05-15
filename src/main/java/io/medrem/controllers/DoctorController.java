@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.medrem.models.Appointment;
 import io.medrem.models.Doctor;
+import io.medrem.models.ERole;
 import io.medrem.models.Schedule;
 import io.medrem.models.User;
 import io.medrem.payload.request.DoctorRequest;
@@ -91,7 +92,7 @@ public class DoctorController {
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with ID: " + doctorId + " does not exist."));
         }
-        if (doctor.getUser().getId() != user.getId()) {
+        if (doctor.getUser().getId() != user.getId() && (user.getRoles().iterator().next().getName() != ERole.ROLE_RECEPTIONIST)) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));
@@ -119,7 +120,7 @@ public class DoctorController {
                     .badRequest()
                     .body(new MessageResponse("Error: Doctor with user ID: " + doctorsUserId+ " does not exist."));
         }
-        if (doctorsUserId != user.getId()) {
+        if (doctorsUserId != user.getId() && (user.getRoles().iterator().next().getName() != ERole.ROLE_RECEPTIONIST)) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: You can only Edit Your Own Details."));
