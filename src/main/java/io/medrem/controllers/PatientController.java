@@ -137,7 +137,7 @@ public class PatientController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('Doctor')")
+    @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('PHYSICIAN')")
     public ResponseEntity<?> getAllPatients(){
         List<Patient> patients = patientRepository.findAll();
         return new ResponseEntity<>(patients, HttpStatus.OK);
