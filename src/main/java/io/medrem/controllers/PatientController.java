@@ -142,6 +142,20 @@ public class PatientController {
         List<Patient> patients = patientRepository.findAll();
         return new ResponseEntity<>(patients, HttpStatus.OK);
     }
+
+    @GetMapping("/getId")
+    @PreAuthorize("hasRole('USER') or hasRole('PHYSICIAN')")
+    public ResponseEntity<?> getPatientID(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+        Patient patient = patientRepository.findByUserId(user.getId()).orElse(null);
+        return new ResponseEntity<>(patient, HttpStatus.OK);
+
+
+    }
+
     
     
 }
