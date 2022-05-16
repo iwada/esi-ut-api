@@ -143,10 +143,24 @@ public class DoctorController {
 
 
     @GetMapping("")
+
     @PreAuthorize("hasRole('RECEPTIONIST') or hasRole('USER')")
     public ResponseEntity<?> getAllDoctors(){
         List<Doctor> doctors = doctorRepository.findAll();
         return new ResponseEntity<>(doctors, HttpStatus.OK);
+    }
+
+    @GetMapping("/getId")
+    @PreAuthorize("hasRole('USER') or hasRole('PHYSICIAN') or hasRole('RECEPTIONIST')")
+    public ResponseEntity<?> getDoctorID(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Optional<User> optUser = userRepository.findById(userDetails.getId());
+        User user = optUser.get();
+        Doctor doctor = doctorRepository.findByUserId(user.getId()).orElse(null);
+        return new ResponseEntity<>(doctor, HttpStatus.OK);
+
+
     }
 
     
