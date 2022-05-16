@@ -92,7 +92,7 @@ public class AppointmentController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Optional<User> optUser = userRepository.findById(userDetails.getId());
-        User user = optUser.get();
+        User deleteuser = optUser.get();
 
         if (doctor == null) {
             return ResponseEntity
@@ -376,6 +376,7 @@ public class AppointmentController {
         List<Appointment> appointments = appointmentRepository.findAll();
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
+    
 
     
 }
